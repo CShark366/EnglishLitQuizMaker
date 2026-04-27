@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LitQuiz — WJEC Eduqas English Literature</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f7f3ec;
+    --cream: #ede8df;
+    --red: #c0392b;
+    --gold: #c9972a;
+    --teal: #1a6b6b;
+    --purple: #4a2c6e;
+    --navy: #1a2744;
+    --green: #1e5e3b;
+    --border: #2a2520;
+    --muted: #7a7065;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    border-bottom: 3px solid var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--gold); }
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── HERO ── */
+  #home {
+    padding: 4rem 2rem 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.2rem;
+  }
+  h1 em { font-style: italic; color: var(--red); }
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.65;
+    margin-bottom: 3rem;
+  }
+
+  /* ── MODULE GRID ── */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .module-card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+  }
+  .module-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.12);
+  }
+
+  .card-macbeth::before { background: var(--red); }
+  .card-inspector::before { background: var(--teal); }
+  .card-carol::before { background: var(--navy); }
+  .card-poetry::before { background: var(--purple); }
+  .card-unseen::before { background: var(--gold); }
+
+  .module-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .module-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+  }
+  .module-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin-bottom: 1rem; }
+  .module-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .badge-macbeth { background: #fdecea; color: var(--red); }
+  .badge-inspector { background: #e6f4f4; color: var(--teal); }
+  .badge-carol { background: #e8eaf2; color: var(--navy); }
+  .badge-poetry { background: #f0ebf7; color: var(--purple); }
+  .badge-unseen { background: #fdf6e3; color: #7a5c0a; }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz-screen {
+    display: none;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .back-btn {
+    background: none;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    padding: 0.45rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .back-btn:hover { background: var(--cream); }
+
+  .quiz-module-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--cream);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .question-box {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .question-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+  .question-quote {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--muted);
+    border-left: 3px solid var(--gold);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    line-height: 1.6;
+  }
+
+  /* Options */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  @media(max-width:520px){ .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    background: white;
+    border: 2px solid var(--cream);
+    border-radius: 4px;
+    padding: 0.9rem 1.1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.12s;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: var(--cream);
+    transform: translateY(-1px);
+  }
+  .option-letter {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    min-width: 20px;
+    padding-top: 1px;
+    opacity: 0.5;
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: #edf7f1;
+    color: var(--green);
+  }
+  .option-btn.correct .option-letter { opacity: 1; }
+  .option-btn.incorrect {
+    border-color: var(--red);
+    background: #fdecea;
+    color: var(--red);
+  }
+  .option-btn:disabled { cursor: default; transform: none; }
+
+  .feedback-box {
+    display: none;
+    padding: 1.25rem 1.5rem;
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+    border: 2px solid;
+  }
+  .feedback-box.correct { background: #edf7f1; border-color: var(--green); color: var(--green); }
+  .feedback-box.incorrect { background: #fdecea; border-color: var(--red); color: var(--red); }
+  .feedback-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem; }
+  .feedback-explain { font-size: 0.85rem; opacity: 0.85; line-height: 1.55; }
+
+  .next-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    padding: 0.85rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+    transition: background 0.15s, transform 0.12s;
+  }
+  .next-btn:hover { background: #2a2520; transform: translateY(-1px); }
+
+  /* ── RESULTS ── */
+  #results-screen {
+    display: none;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    text-align: center;
+  }
+  .results-emoji { font-size: 4rem; margin-bottom: 1.5rem; }
+  .results-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+  }
+  .results-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 3.5rem;
+    font-weight: 500;
+    margin: 1.5rem 0;
+  }
+  .results-breakdown {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+  }
+  .breakdown-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--cream);
+    font-size: 0.9rem;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .breakdown-result { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+  .breakdown-result.ok { color: var(--green); }
+  .breakdown-result.bad { color: var(--red); }
+
+  .results-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 0.8rem 1.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: #2a2520; }
+  .btn-secondary {
+    background: white;
+    color: var(--ink);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 0.8rem 1.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: var(--cream); }
+
+  /* Unseen poem display */
+  .poem-box {
+    background: var(--cream);
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    padding: 1.5rem 2rem;
+    margin: 1rem 0 1.5rem;
+    font-style: italic;
+    line-height: 2;
+    font-size: 0.92rem;
+    white-space: pre-line;
+  }
+  .poem-title {
+    font-family: 'Playfair Display', serif;
+    font-style: normal;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: var(--muted);
+  }
+
+  footer {
+    background: var(--ink);
+    color: var(--muted);
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .animate-in { animation: fadeIn 0.35s ease forwards; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lit<span>Quiz</span></div>
+  <div class="header-tag">WJEC Eduqas · English Literature</div>
+</header>
+
+<!-- HOME SCREEN -->
+<div id="home">
+  <p class="eyebrow">Revision Tool · Component 1 &amp; 2</p>
+  <h1>Master your<br><em>set texts.</em></h1>
+  <p class="subtitle">Choose a module to start a quiz. Questions are randomised each time, covering themes, quotes, context, characters, and unseen poetry analysis — all aligned to the WJEC Eduqas specification.</p>
+</div>
+
+<div class="module-grid">
+  <div class="module-card card-macbeth" onclick="startQuiz('macbeth')">
+    <div class="module-icon">🗡️</div>
+    <div class="module-title">Macbeth</div>
+    <div class="module-desc">Ambition, guilt, power, and the supernatural — Shakespeare's darkest tragedy.</div>
+    <span class="module-badge badge-macbeth">Component 2 · Drama</span>
+  </div>
+  <div class="module-card card-inspector" onclick="startQuiz('inspector')">
+    <div class="module-icon">🔍</div>
+    <div class="module-title">An Inspector Calls</div>
+    <div class="module-desc">Social responsibility, class, and morality in Priestley's postwar masterpiece.</div>
+    <span class="module-badge badge-inspector">Component 2 · Drama</span>
+  </div>
+  <div class="module-card card-carol" onclick="startQuiz('carol')">
+    <div class="module-icon">🕯️</div>
+    <div class="module-title">A Christmas Carol</div>
+    <div class="module-desc">Redemption, poverty, and Victorian society in Dickens' enduring novella.</div>
+    <span class="module-badge badge-carol">Component 2 · Prose</span>
+  </div>
+  <div class="module-card card-poetry" onclick="startQuiz('poetry')">
+    <div class="module-icon">📜</div>
+    <div class="module-title">Poetry Anthology</div>
+    <div class="module-desc">Compare poems across the WJEC Eduqas cluster — themes, form, and context.</div>
+    <span class="module-badge badge-poetry">Component 1 · Poetry</span>
+  </div>
+  <div class="module-card card-unseen" onclick="startQuiz('unseen')">
+    <div class="module-icon">🔭</div>
+    <div class="module-title">Unseen Poetry</div>
+    <div class="module-desc">Practise identifying themes and techniques in poems you've never seen before.</div>
+    <span class="module-badge badge-unseen">Component 1 · Unseen</span>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <span class="quiz-module-label" id="quiz-module-label"></span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="progress-text" id="progress-text"></span>
+  </div>
+  <div class="question-box animate-in" id="question-box">
+    <div class="question-type" id="question-type"></div>
+    <div class="question-text" id="question-text"></div>
+    <div class="question-quote" id="question-quote" style="display:none"></div>
+    <div class="poem-box" id="poem-box" style="display:none"><div class="poem-title" id="poem-title"></div><div id="poem-lines"></div></div>
+  </div>
+  <div class="options-grid" id="options-grid"></div>
+  <div class="feedback-box" id="feedback-box">
+    <div class="feedback-label" id="feedback-label"></div>
+    <div class="feedback-explain" id="feedback-explain"></div>
+  </div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results-screen">
+  <div class="results-emoji" id="results-emoji"></div>
+  <div class="results-title" id="results-title"></div>
+  <div class="results-score" id="results-score"></div>
+  <div class="results-breakdown">
+    <div class="breakdown-title">Question Breakdown</div>
+    <div id="breakdown-list"></div>
+  </div>
+  <div class="results-actions">
+    <button class="btn-primary" id="retry-btn">Try Again</button>
+    <button class="btn-secondary" onclick="goHome()">All Modules</button>
+  </div>
+</div>
+
+<footer>LitQuiz · WJEC Eduqas English Literature · Built for revision purposes only</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  QUESTION BANKS
+// ═══════════════════════════════════════════════════════════════════
+
+const QUESTION_BANKS = {
+
+macbeth: [
+  { type:"Theme", q:"Which theme does the quote \"Fair is foul, and foul is fair\" most clearly introduce?", quote:"Fair is foul, and foul is fair", options:["Appearance vs Reality","Loyalty vs Betrayal","Fate vs Free Will","Love and Marriage"], answer:0, explain:"The witches' paradox immediately establishes that nothing in the play is as it seems — a core theme throughout." },
+  { type:"Character", q:"Which character is described as \"too full o' the milk of human kindness\" by Lady Macbeth?", options:["Duncan","Macbeth","Banquo","Malcolm"], answer:1, explain:"Lady Macbeth fears her husband lacks the ruthlessness needed for murder — she sees kindness as a weakness." },
+  { type:"Context", q:"Which historical figure was King of Scotland when Shakespeare wrote Macbeth (c.1606)?", options:["Elizabeth I","James I","Henry VIII","Charles I"], answer:1, explain:"James I (VI of Scotland) was a key audience member. Shakespeare included witches partly to flatter James, who was fascinated by witchcraft." },
+  { type:"Quote", q:"Who speaks the line \"Out, damned spot! out, I say\"?", quote:"Out, damned spot! out, I say", options:["Lady Macbeth","The Three Witches","Macbeth","Hecate"], answer:0, explain:"Lady Macbeth speaks this in her sleepwalking scene (Act 5), showing guilt consuming her — the blood stain symbolises her conscience." },
+  { type:"Theme", q:"What does Macbeth's 'Tomorrow, and tomorrow, and tomorrow' soliloquy primarily express?", quote:"Tomorrow, and tomorrow, and tomorrow", options:["Relief at Lady Macbeth's death","Nihilism and despair about the futility of life","Hope for a new beginning","Anger towards Malcolm"], answer:1, explain:"The soliloquy reflects Macbeth's complete spiritual collapse — life feels meaningless after Lady Macbeth's death." },
+  { type:"Structure", q:"The three witches appear at the start of the play. What structural purpose does this serve?", options:["To establish the comedy of the play","To immediately introduce themes of evil and prophecy","To show Scotland is at peace","To introduce Macbeth as a hero"], answer:1, explain:"Opening with the witches establishes a dark, supernatural atmosphere and foreshadows the themes of fate, evil, and deception." },
+  { type:"Character", q:"What is Banquo's significance at Macbeth's banquet in Act 3?", options:["He arrives late and embarrasses Macbeth","His ghost appears and only Macbeth can see him","He reveals Macbeth's guilt to the guests","He challenges Macbeth to a duel"], answer:1, explain:"Banquo's ghost haunts Macbeth at the feast, externalising his guilt and paranoia — the supernatural mirrors his psychological collapse." },
+  { type:"Language", q:"Shakespeare uses the imagery of \"borrowed robes\" to suggest what about Macbeth's kingship?", quote:"borrowed robes", options:["Macbeth is a generous king","His power is ill-fitting and illegitimate","He is humble and modest","He dresses extravagantly"], answer:1, explain:"Angus uses clothing imagery to suggest Macbeth's title doesn't fit — his power is stolen, not earned." },
+  { type:"Theme", q:"The witches' prophecies can be seen to represent which philosophical debate?", options:["Science vs Religion","Fate vs Free Will","Love vs Duty","Good vs Evil only"], answer:1, explain:"The play questions whether Macbeth was destined to kill Duncan or chose to. Both readings are valid in the WJEC exam." },
+  { type:"Character", q:"At the start of the play, how is Macbeth described by the Captain?", options:["A cowardly soldier","A brave and loyal warrior","An ambitious and jealous man","A cruel tyrant"], answer:1, explain:"The Captain praises Macbeth's valour in battle, making his later fall from grace even more tragic." },
+  { type:"Theme", q:"Which theme does Lady Macbeth's 'unsex me here' speech most closely relate to?", quote:"unsex me here", options:["Gender and power","Supernatural evil","Ambition for wealth","Loyalty to the king"], answer:0, explain:"Lady Macbeth calls on spirits to remove her feminine traits, questioning 17th century gender norms and challenging what it means to be powerful." },
+  { type:"Quote", q:"Who says \"Stars, hide your fires; Let not light see my black and deep desires\"?", quote:"Stars, hide your fires; Let not light see my black and deep desires", options:["Lady Macbeth","The Witches","Macbeth","Ross"], answer:2, explain:"Macbeth speaks this in Act 1, showing he is already contemplating regicide but trying to hide his ambition." },
+  { type:"Context", q:"The Divine Right of Kings was the belief that...", options:["Kings could be overthrown by the people","Kings were chosen directly by God and murdering them was a sin against God","Kings had no real power","Kings answered only to Parliament"], answer:1, explain:"Killing Duncan, God's anointed king, was considered a sin against God — making Macbeth's crime even more horrific to a Jacobean audience." },
+  { type:"Character", q:"What finally causes Macbeth's downfall?", options:["Duncan's ghost haunting him","Malcolm's army and Macduff, who was born by Caesarean section","Banquo revealing his crime","The witches turning against him"], answer:1, explain:"Macbeth misinterprets the witches' prophecies. Macduff was 'from his mother's womb untimely ripped' — fulfilling the prophecy Macbeth thought protected him." },
+  { type:"Language", q:"Which technique does Shakespeare use in \"Sleep no more! Macbeth does murder sleep\"?", quote:"Sleep no more! Macbeth does murder sleep", options:["Pathetic fallacy","Personification and metaphor","Alliteration only","Simile"], answer:1, explain:"Sleep is personified as something that can be murdered, symbolising Macbeth's destroyed innocence and peace of mind." },
+],
+
+inspector: [
+  { type:"Theme", q:"What is the central theme of An Inspector Calls?", options:["The importance of romantic love","Social responsibility and collective guilt","The dangers of detective work","Class loyalty and tradition"], answer:1, explain:"Priestley's central message is that everyone bears responsibility for society's vulnerable — the Birlings represent those who refuse to accept this." },
+  { type:"Quote", q:"Who says \"We are members of one body. We are responsible for each other\"?", quote:"We are members of one body. We are responsible for each other", options:["Sheila Birling","Eric Birling","Inspector Goole","Arthur Birling"], answer:2, explain:"The Inspector delivers this final moral statement — it is the play's central message and Priestley's own socialist belief." },
+  { type:"Character", q:"What does Mr Birling's speech about the Titanic and war suggest about him?", options:["He is wise and well-informed","He is dangerously overconfident and wrong in his predictions","He is a pacifist","He is afraid of technology"], answer:1, explain:"Priestley uses dramatic irony — the audience knows the Titanic sank and war did happen, immediately establishing Birling as foolish and unreliable." },
+  { type:"Context", q:"When was An Inspector Calls written, and when is it set? Why does this matter?", options:["Written 1912, set 1945 — to show war changed nothing","Written 1945, set 1912 — to show how society should have changed but hadn't","Written 1939, set 1900","Written 1945, set 1945"], answer:1, explain:"The 33-year gap is crucial. Priestley wrote it after WWII to warn audiences who had survived two wars that they must build a fairer society." },
+  { type:"Character", q:"How does Sheila change over the course of the play?", options:["She becomes more like her parents","She moves from naivety to moral awareness and genuine guilt","She marries Gerald and ignores the Inspector","She becomes dishonest"], answer:1, explain:"Sheila represents the possibility of change. Unlike her parents, she accepts responsibility and refuses to go back to complacency." },
+  { type:"Language", q:"What is the significance of Inspector Goole's name?", options:["It suggests he is a real police inspector","'Goole' sounds like 'ghoul' — suggesting he may be supernatural or symbolic","It is a real Yorkshire place name only","It suggests he is German"], answer:1, explain:"'Goole' evokes 'ghoul', hinting the Inspector may be a ghost, a manifestation of conscience, or a symbol of socialist judgement rather than a real person." },
+  { type:"Theme", q:"What does Eva Smith/Daisy Renton represent in the play?", options:["The upper class","The working class and all those exploited by the powerful","Priestley's ideal woman","A symbol of love"], answer:1, explain:"Eva represents every working-class person exploited by the Birlings' class. Her many names suggest she is every woman, not just one." },
+  { type:"Structure", q:"Why does Priestley set the play in real time within one room?", options:["To save money on set design","To create tension and claustrophobia — no one can escape the Inspector's questions","To make it easier to stage","To reflect upper-class domestic life"], answer:1, explain:"The unity of time and place (classical dramatic unities) creates inescapable tension — the characters are trapped with their guilt just as the audience is trapped watching it." },
+  { type:"Quote", q:"Mr Birling says \"a man has to mind his own business and look after himself and his own\". What does this reveal?", quote:"a man has to mind his own business and look after himself and his own", options:["His community spirit","His capitalist individualism — the opposite of Priestley's message","His generosity","His belief in democracy"], answer:1, explain:"Birling's philosophy of self-interest is exactly what Priestley is arguing against. He is set up as a 'straw man' for the audience to reject." },
+  { type:"Character", q:"Why does Gerald Croft's role in Eva's story make him both sympathetic and guilty?", options:["He only ever helped Eva and is entirely innocent","He saved Eva temporarily but used her as a mistress then abandoned her","He reported her to the police","He was her employer"], answer:1, explain:"Gerald rescued Eva from Alderman Meggarty and gave her money, but he also took her as a mistress for his own pleasure then coldly ended the relationship." },
+  { type:"Theme", q:"What does the final phone call at the end of the play represent?", options:["A happy ending for the Birlings","The return of reality and the threat of true consequences — suggesting moral reckoning always comes","Evidence the Inspector was real all along","A new mystery beginning"], answer:1, explain:"The ending is deliberately ambiguous and cyclical. The Birlings have learned nothing, and Priestley suggests they — and society — will face judgement eventually." },
+  { type:"Context", q:"Priestley was a socialist. How does this influence the play?", options:["He makes all rich characters heroic","He uses the play to argue for collective responsibility and critique capitalism","He suggests working-class people are to blame for their own suffering","He has no political agenda"], answer:1, explain:"Priestley's socialism runs through every aspect: the Birlings represent the capitalist class who exploit workers, while the Inspector voices the socialist ideal of shared responsibility." },
+  { type:"Character", q:"What does Eric's alcoholism and theft suggest Priestley is saying about the upper class?", options:["The upper class is morally superior","The comfortable upper-class lifestyle can breed hidden moral corruption","Eric is simply wicked","Alcohol was a common problem everywhere"], answer:1, explain:"Eric's hidden flaws — drinking, theft, and forcing himself on Eva — show that privilege hides moral decay, not goodness." },
+  { type:"Language", q:"The Inspector says \"One Eva Smith has gone — but there are millions and millions of Eva Smiths\". What technique is this?", quote:"One Eva Smith has gone — but there are millions and millions of Eva Smiths", options:["Metaphor","Repetition and generalisation to make Eva symbolic of the working class","Alliteration","Onomatopoeia"], answer:1, explain:"The repetition of 'millions' broadens Eva's story to encompass all exploited working-class people — Priestley turns a personal tragedy into a social statement." },
+],
+
+carol: [
+  { type:"Theme", q:"What is the primary theme of A Christmas Carol?", options:["The importance of Christmas traditions","Redemption and the capacity for change","The dangers of the supernatural","Victorian ghost stories"], answer:1, explain:"Dickens' novella is fundamentally about whether people can change. Scrooge's transformation shows that redemption is always possible." },
+  { type:"Quote", q:"Scrooge famously says \"Bah! Humbug!\" What does this reveal about him?", quote:"Bah! Humbug!", options:["His love of debate","His contemptuous dismissal of Christmas joy and generosity","His sense of humour","His grief over Marley's death"], answer:1, explain:"'Humbug' means nonsense or fraud — Scrooge sees Christmas generosity as foolish and sentimental, revealing his cynical, misanthropic character." },
+  { type:"Character", q:"What does Jacob Marley's ghost represent?", options:["The joy of Christmas past","The consequences of a selfish, greedy life — a warning of what Scrooge will become","The spirit of generosity","Victorian poverty"], answer:1, explain:"Marley is a cautionary figure. He is condemned to wander the earth weighed down by the chains he forged in life — chains of greed and selfishness." },
+  { type:"Context", q:"Dickens wrote A Christmas Carol partly in response to which real-world document?", options:["The Poor Law Amendment Act reports about child labour in mines","The Reform Act 1832","The Factory Act","The Great Exhibition"], answer:0, explain:"The 1843 Children's Employment Commission reports shocked Dickens — he considered writing a pamphlet but chose fiction as a more powerful vehicle for social reform." },
+  { type:"Theme", q:"What does the Ghost of Christmas Present reveal about 'Ignorance' and 'Want'?", options:["They are two naughty children belonging to Scrooge","Two wretched children hidden beneath the Spirit's robes, representing society's moral failures","Two ghosts who will visit Scrooge later","Metaphors for Scrooge's personality"], answer:1, explain:"The children 'Ignorance' and 'Want' are one of Dickens' most powerful social statements — they represent what happens when society ignores the poor and uneducated." },
+  { type:"Quote", q:"Who says \"Are there no prisons? Are there no workhouses?\"?", quote:"Are there no prisons? Are there no workhouses?", options:["Fred","Bob Cratchit","Scrooge","Marley"], answer:2, explain:"Scrooge callously echoes the language of Victorian social policy back at charity collectors — Dickens uses this to condemn the Malthusian attitude toward the poor." },
+  { type:"Character", q:"What role does Tiny Tim play in the novella?", options:["He is used purely for comedy","He symbolises the innocent victims of poverty and Scrooge's potential to do good","He is Scrooge's nephew","He represents Scrooge's childhood self"], answer:1, explain:"Tiny Tim's catchphrase 'God bless Us, Every One!' embodies Christian charity. His possible death makes poverty personal and urgent for both Scrooge and the reader." },
+  { type:"Language", q:"Dickens describes Scrooge as \"a squeezing, wrenching, grasping, scraping, clutching, covetous old sinner\". What technique is this?", quote:"a squeezing, wrenching, grasping, scraping, clutching, covetous old sinner", options:["Listing/accumulation and alliteration to overwhelm the reader with Scrooge's greed","Simple description","Onomatopoeia only","Simile"], answer:0, explain:"The relentless accumulation of present participles ('squeezing, wrenching...') mimics the endless, aggressive nature of Scrooge's greed — it feels suffocating." },
+  { type:"Structure", q:"Why does Dickens call his chapters 'Staves' rather than chapters?", options:["He was a musician","Staves are sections of a musical score — the novella is structured like a carol or song","It was a Victorian publishing convention","Each stave features a different ghost"], answer:1, explain:"'Stave' refers to a line of music. The novella is structured like a Christmas Carol — five staves, as a carol has verses — reinforcing the festive, redemptive message." },
+  { type:"Character", q:"What does Fred (Scrooge's nephew) represent in the novella?", options:["The folly of generosity","The joy and warmth of Christmas spirit — the life Scrooge has rejected","Victorian hypocrisy","Marley's former goodness"], answer:1, explain:"Fred embodies everything Scrooge rejects — warmth, generosity, love, and Christmas spirit. His cheerfulness highlights Scrooge's spiritual poverty." },
+  { type:"Theme", q:"How does Dickens use the motif of cold and warmth throughout the novella?", options:["Cold represents winter, warmth represents summer","Cold represents Scrooge's spiritual state; warmth represents human connection and generosity","Cold represents poverty; warmth represents wealth","It is purely descriptive with no symbolic meaning"], answer:1, explain:"Temperature is consistently symbolic — Scrooge's counting house is bitterly cold, while the Cratchit home is warm despite poverty. The cold/warmth contrast tracks Scrooge's spiritual transformation." },
+  { type:"Context", q:"What was the attitude toward the poor reflected by 'Malthusian' thinking that Dickens was attacking?", options:["The poor deserved unlimited support","Overpopulation meant helping the poor was economically harmful — let them die to 'decrease the surplus population'","The poor should be educated first","The rich had a duty to the poor"], answer:1, explain:"Scrooge literally echoes Malthus' phrase 'surplus population'. Dickens was directly attacking this dehumanising ideology by making Scrooge see the real people behind these statistics." },
+  { type:"Quote", q:"What does \"mankind was my business\" (Marley) suggest?", quote:"mankind was my business", options:["Marley was a people person","Marley now believes his real purpose was to care for others, not accumulate wealth","Marley ran a people-trafficking business","It suggests Scrooge was always kind"], answer:1, explain:"This is Marley's central regret — he spent his life focused on financial business when human welfare was his true obligation. It foreshadows Scrooge's transformation." },
+],
+
+poetry: [
+  { type:"Theme", q:"In 'London' by William Blake, the word 'chartered' suggests what?", options:["A sense of freedom and possibility","Ownership, restriction, and the commodification of even natural things","A charter for citizens' rights","Maps and geography"], answer:1, explain:"'Chartered' (meaning both mapped and legally owned) applied to both streets and the Thames — nature itself is owned and restricted in Blake's London." },
+  { type:"Quote", q:"In 'Ozymandias', Shelley describes \"two vast and trunkless legs of stone\". What does this image represent?", quote:"two vast and trunkless legs of stone", options:["The power of ancient empires","The inevitable decay of power and human arrogance","A warning against art","The beauty of sculpture"], answer:1, explain:"The broken statue — once great, now fragments — perfectly embodies Shelley's theme: no matter how powerful, all rulers and empires eventually crumble." },
+  { type:"Theme", q:"What is the central theme of 'My Last Duchess' by Robert Browning?", options:["The beauty of art","Male power, control, and the objectification of women","Love and marriage","Italian Renaissance culture"], answer:1, explain:"The Duke's chilling monologue reveals he had his wife killed for perceived disobedience — the poem exposes toxic patriarchal control masked by aristocratic courtesy." },
+  { type:"Context", q:"'Dulce et Decorum Est' by Wilfred Owen directly challenges what?", options:["British imperialism in India","The propaganda that war was glorious and honourable — 'the old Lie'","Pacifism during WWI","The French army's conduct"], answer:1, explain:"Owen was writing from the trenches, directly contradicting the recruiting posters and Jessie Pope's poetry that glorified dying for one's country." },
+  { type:"Language", q:"In 'Storm on the Island', Heaney writes the community \"are prepared\". What does this suggest about the islanders?", options:["They are fearful of the storm","They have a defiant, stoic resilience built on experience","They have no choice but to leave","They have built sea walls"], answer:1, explain:"The poem begins with confident preparedness — Heaney's islanders know the storm and face it defiantly, though the poem complicates this confidence as the storm's power grows." },
+  { type:"Theme", q:"In 'Poppies' by Jane Weir, what do the poppies symbolise?", options:["Romantic love","Remembrance of soldiers killed in war and a mother's grief","Spring and renewal","Childhood and innocence only"], answer:1, explain:"Poppies are the symbol of WWI remembrance. Weir uses them to explore a contemporary mother's grief as her son leaves, linking personal loss to collective wartime loss." },
+  { type:"Quote", q:"In 'Charge of the Light Brigade', Tennyson repeats \"Into the valley of Death\". What effect does this have?", quote:"Into the valley of Death", options:["It shows the soldiers were lost","The repetition creates a relentless, drumbeat rhythm that mirrors the cavalry charge and emphasises the soldiers' certain fate","It shows the poem is a ballad","It suggests Tennyson disapproved of the charge"], answer:1, explain:"The anaphora and driving dactylic rhythm mimics hoofbeats and creates an unstoppable momentum — the soldiers gallop into death with terrifying inevitability." },
+  { type:"Theme", q:"What is the key contrast in 'Exposure' by Wilfred Owen?", options:["Love and hate","The deadly nature of cold and inaction versus the expected action of battle","Cowardice and bravery","The trenches versus civilian life"], answer:1, explain:"The soldiers are not killed by enemy fire but by freezing weather and waiting. Owen subverts war poetry expectations — nature, not battle, is the true enemy." },
+  { type:"Language", q:"In 'Bayonet Charge' by Ted Hughes, the soldier is described as running \"in a cold clockwork of the stars\". What does this suggest?", quote:"in a cold clockwork of the stars", options:["He is well-trained","War reduces humans to mechanical automatons — they lose agency and humanity","He is an astronomer","He is orientating himself using stars"], answer:1, explain:"'Clockwork' dehumanises the soldier — he is a cog in a machine. The cosmic scale makes individual human life seem insignificant within war." },
+  { type:"Context", q:"'Remains' by Simon Armitage is based on the experiences of which group?", options:["WWI soldiers","A contemporary British soldier returning from Iraq or Afghanistan","A WWII pilot","A civilian in the Blitz"], answer:1, explain:"Armitage wrote 'Remains' based on the testimony of ex-soldier Eddie Beddoes — it explores PTSD and the psychological aftermath of shooting a looter in a modern war zone." },
+  { type:"Theme", q:"What does the hawk in 'Hawk Roosting' by Ted Hughes represent?", options:["Freedom and nature","Totalitarian power, arrogance, and the mindset of a dictator","The beauty of wildlife","Environmental destruction"], answer:1, explain:"The hawk's absolute certainty in its own power ('I kill where I please because it is all mine') reads as a portrait of fascist/dictatorial thinking — nature as political allegory." },
+  { type:"Language", q:"In 'War Photographer' by Carol Ann Duffy, why does she use the word 'spools' for the film?", quote:"spools", options:["It creates alliteration","Spools rhymes with tools — suggesting photography is craft","The spools unrolling suggest the photographer slowly reliving traumatic memories, the images 'developing' like grief","It was technical accuracy only"], answer:2, explain:"The spooling film mirrors the unwinding of suppressed memories — as the images develop, so do the photographer's feelings, which he tries to repress in his work." },
+],
+
+unseen: [
+  {
+    type:"Unseen Poetry",
+    title:"'The Trees' — Philip Larkin",
+    poem:`The trees are coming into leaf
+Like something almost being said;
+The recent buds relax and spread,
+Their greenness is a kind of grief.
+
+Is it that they are born again
+And we grow old? No, they die too.
+Their yearly trick of looking new
+Is written down in rings of grain.
+
+Yet still the unresting castles thresh
+In fullness of their folly; and
+Last year is dead, they seem to say,
+Begin afresh, afresh, afresh.`,
+    q:"What is the main theme of this poem?",
+    options:["The beauty of trees in spring","The cycle of nature as a meditation on mortality and renewal","Grief over a lost relationship","The importance of forests"],
+    answer:1,
+    explain:"Larkin uses trees coming into leaf to meditate on the contrast between nature's annual renewal and human mortality — we age and die while trees appear reborn each year. The final word 'afresh' repeated three times offers a tentative message of hope."
+  },
+  {
+    type:"Unseen Poetry",
+    title:"'Nothing Gold Can Stay' — Robert Frost",
+    poem:`Nature's first green is gold,
+Her hardest hue to hold.
+Her early leaf's a flower;
+But only so an hour.
+Then leaf subsides to leaf.
+So Eden sank to grief,
+So dawn goes down to day.
+Nothing gold can stay.`,
+    q:"Which of these themes is most central to this poem?",
+    options:["The joy of spring","The inevitability of loss — beauty and innocence cannot last","Criticism of industrialisation","Religious devotion"],
+    answer:1,
+    explain:"Frost uses natural imagery (spring, dawn) to argue that all things precious — beauty, innocence, youth — are transient. The biblical allusion to Eden reinforces that loss of perfection is part of the human condition."
+  },
+  {
+    type:"Unseen Poetry",
+    title:"'Follower' — Seamus Heaney",
+    poem:`My father worked with a horse-plough,
+His shoulders globed like a full sail strung
+Between the shafts and the furrow.
+The horse strained at his clicking tongue.
+
+An expert. He would set the wing
+And fit the bright steel-pointed sock.
+The sod rolled over without breaking.
+At the mapping out the furrow, exactly.
+
+I stumbled in his hobnailed wake,
+Fell sometimes on the polished sod;
+Sometimes he rode me on his back
+Dipping and rising to his plod.
+
+I wanted to grow up and plough,
+To close one eye, stiffen my arm.
+All I ever did was follow
+In his broad shadow, growing.
+
+But today it is my father who keeps stumbling
+Behind me, and will not go away.`,
+    q:"What is the key theme shift in the final stanza?",
+    options:["The speaker becomes a farmer like his father","The roles of parent and child have reversed — the father now follows and depends on the son","The speaker rejects farming entirely","The father has died"], answer:1,
+    explain:"The poem moves from childhood admiration of a capable father to the poignant reversal where the ageing father 'stumbles' behind the adult son. The final image captures both the speaker's slight resentment and tender guilt about this role reversal — a meditation on ageing and filial duty."
+  },
+  {
+    type:"Unseen Poetry",
+    title:"'Half-past Two' — U.A. Fanthorpe",
+    poem:`Once upon a schooltime
+He did Something Very Wrong
+(I forget what it was).
+
+And She said he'd stay in the school-room till half-past two.
+(Being cross, she did not think about Time's arrow,
+Locked him in himself until a particular time.)
+
+He knew the clock face, he knew
+The going-home time, the timetabled time,
+But not half-past two.
+
+He learnt to untimetable himself;
+Into the smell of old chrysanthemums on Her desk,
+Into the air outside the window, into ever.
+
+And then, My goodness, it was half-past two.`,
+    q:"What is the central theme of this poem?",
+    options:["The cruelty of teachers in schools","A child's innocent relationship with time and the freedom of imagination beyond adult structures","The difficulty of telling the time","Nostalgia for school days"],
+    answer:1,
+    explain:"Fanthorpe explores how a young child, not fully understanding clock time, slips into a more fluid, imaginative experience of time. The poem contrasts the rigid adult world of timetables with the child's liberating, timeless inner world — childhood as a space of innocent freedom."
+  },
+  {
+    type:"Unseen Poetry",
+    title:"'On the Grasshopper and Cricket' — John Keats",
+    poem:`The poetry of earth is never dead:
+  When all the birds are faint with the hot sun,
+  And hide in cooling trees, a voice will run
+From hedge to hedge about the new-mown mead;
+That is the Grasshopper's — he takes the lead
+  In summer luxury, — he has never done
+  With his delights; for when tired out with fun
+He rests at ease beneath some pleasant weed.
+The poetry of earth is ceasing never:
+  On a lone winter evening, when the frost
+    Has wrought a silence, from the stove there shrills
+The Cricket's song, in warmth increasing ever,
+  And seems to one in drowsiness half-lost,
+    The Grasshopper's among some grassy hills.`,
+    q:"What is the central idea of this sonnet?",
+    options:["Grasshoppers and crickets are the best singers","Nature's music and poetry are eternal — beauty persists through all seasons","Winter is more beautiful than summer","Keats is homesick for the countryside"],
+    answer:1,
+    explain:"Keats argues that nature is always alive with sound and poetry — the grasshopper in summer and cricket in winter are two voices in one endless song. The repetition of 'never dead / ceasing never' frames nature's creativity as immortal, contrasting with human transience."
+  },
+  {
+    type:"Unseen Poetry",
+    title:"'Flag' — John Agard",
+    poem:`What's that fluttering in a field?
+It's just a piece of cloth
+that brings a nation to its knees.
+
+What's that unfurling from a pole?
+It's just a piece of cloth
+that makes the mighty fall.
+
+What's that flying across a field?
+It's just a piece of cloth
+that's eaten many men.
+
+Then wave me your piece of cloth
+and I will stand beneath your flag
+and die.`,
+    q:"What is Agard criticising in this poem?",
+    options:["The design of national flags","Blind nationalism — how a simple symbol manipulates people into dying for abstract ideas","The weakness of soldiers","The importance of patriotism"],
+    answer:1,
+    explain:"Agard repeatedly deflates the flag to 'just a piece of cloth' to expose how a simple symbol manipulates people into extreme acts — war and death — for abstract national identity. The bitter final stanza is deeply sarcastic, exposing the dangerous power of nationalism."
+  },
+  {
+    type:"Unseen Poetry",
+    title:"'The Road Not Taken' — Robert Frost",
+    poem:`Two roads diverged in a yellow wood,
+And sorry I could not travel both
+And be one traveler, long I stood
+And looked down one as far as I could
+To where it bent in the undergrowth;
+
+Then took the other, as just as fair,
+And having perhaps the better claim,
+Because it was grassy and wanted wear;
+Though as for that the passing there
+Had worn them really about the same,
+
+And both that morning equally lay
+In leaves no step had trodden black.
+Oh, I kept the first for another day!
+Yet knowing how way leads on to way,
+I doubted if I should ever come back.
+
+I shall be telling this with a sigh
+Somewhere ages and ages hence:
+That two roads diverged in a wood, and I—
+I took the one less traveled by,
+And that has made all the difference.`,
+    q:"What is the poem's most complex, ironic theme?",
+    options:["The importance of making brave independent choices","The poem ironically reveals how we construct self-justifying narratives about our choices — the two roads were actually equal","Nature is full of choices","Following the crowd leads to failure"],
+    answer:1,
+    explain:"Frost's poem is often misread as celebrating individuality. In fact, the speaker admits both paths 'had worn them really about the same' — yet in old age will claim he took the brave, less-travelled road. The poem is about how we mythologise our choices retrospectively."
+  },
+]
+
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  QUIZ ENGINE
+// ═══════════════════════════════════════════════════════════════════
+
+const MODULE_COLORS = {
+  macbeth:'#c0392b', inspector:'#1a6b6b', carol:'#1a2744', poetry:'#4a2c6e', unseen:'#c9972a'
+};
+const MODULE_NAMES = {
+  macbeth:'Macbeth', inspector:'An Inspector Calls', carol:'A Christmas Carol',
+  poetry:'Poetry Anthology', unseen:'Unseen Poetry'
+};
+
+let currentModule = null;
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let results = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(module) {
+  currentModule = module;
+  questions = shuffle(QUESTION_BANKS[module]).slice(0, 10);
+  currentQ = 0;
+  score = 0;
+  results = [];
+
+  document.getElementById('home').style.display = 'none';
+  document.querySelector('.module-grid').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+
+  document.getElementById('quiz-module-label').textContent = MODULE_NAMES[module];
+  document.getElementById('progress-fill').style.background = MODULE_COLORS[module];
+
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  const total = questions.length;
+
+  // progress
+  document.getElementById('progress-fill').style.width = ((currentQ / total) * 100) + '%';
+  document.getElementById('progress-text').textContent = `${currentQ + 1} / ${total}`;
+
+  // question
+  document.getElementById('question-type').textContent = q.type;
+  document.getElementById('question-text').textContent = q.q;
+
+  const quoteEl = document.getElementById('question-quote');
+  if (q.quote) { quoteEl.textContent = '"' + q.quote + '"'; quoteEl.style.display = 'block'; }
+  else { quoteEl.style.display = 'none'; }
+
+  // poem for unseen
+  const poemBox = document.getElementById('poem-box');
+  if (q.poem) {
+    document.getElementById('poem-title').textContent = q.title;
+    document.getElementById('poem-lines').textContent = q.poem;
+    poemBox.style.display = 'block';
+  } else {
+    poemBox.style.display = 'none';
+  }
+
+  // options
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt}`;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  // hide feedback & next
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  document.getElementById('next-btn').style.display = 'none';
+
+  // animate
+  document.getElementById('question-box').classList.remove('animate-in');
+  void document.getElementById('question-box').offsetWidth;
+  document.getElementById('question-box').classList.add('animate-in');
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const buttons = document.querySelectorAll('.option-btn');
+  const correct = idx === q.answer;
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === idx && !correct) btn.classList.add('incorrect');
+  });
+
+  if (correct) score++;
+  results.push({ q: q.q, correct });
+
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (correct ? 'correct' : 'incorrect');
+  document.getElementById('feedback-label').textContent = correct ? '✓ Correct!' : '✗ Not quite';
+  document.getElementById('feedback-explain').textContent = q.explain;
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = currentQ + 1 < questions.length ? 'Next Question →' : 'See Results →';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < questions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+
+  const pct = Math.round((score / questions.length) * 100);
+  let emoji, title;
+  if (pct >= 90) { emoji = '🏆'; title = 'Outstanding!'; }
+  else if (pct >= 70) { emoji = '⭐'; title = 'Well done!'; }
+  else if (pct >= 50) { emoji = '📚'; title = 'Good effort — keep revising!'; }
+  else { emoji = '💪'; title = 'Keep going — you\'ll get there!'; }
+
+  document.getElementById('results-emoji').textContent = emoji;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-score').textContent = `${score} / ${questions.length}`;
+
+  const list = document.getElementById('breakdown-list');
+  list.innerHTML = '';
+  results.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    const short = r.q.length > 65 ? r.q.slice(0, 65) + '…' : r.q;
+    row.innerHTML = `<span style="font-size:0.85rem">${i+1}. ${short}</span>
+      <span class="breakdown-result ${r.correct ? 'ok' : 'bad'}">${r.correct ? '✓' : '✗'}</span>`;
+    list.appendChild(row);
+  });
+
+  document.getElementById('retry-btn').onclick = () => startQuiz(currentModule);
+}
+
+function goHome() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('home').style.display = 'block';
+  document.querySelector('.module-grid').style.display = 'grid';
+}
+</script>
+</body>
+</html>
